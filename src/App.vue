@@ -1,11 +1,58 @@
-<script setup></script>
+<script setup>
+import { ref } from 'vue'
+import { recipes as allRecipes } from '@/data/recipes'
+import RecipeCard from '@/components/RecipeCard.vue'
+
+// On stocke les recettes dans une référence réactive
+const recipes = ref(allRecipes)
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <main class="container">
+    <header>
+      <h1>Nos Recettes</h1>
+    </header>
+
+    <!-- CAS 1 : Si la liste contient des recettes -->
+    <section v-if="recipes.length > 0" class="recipes-grid">
+      <RecipeCard 
+        v-for="recipe in recipes" 
+        :key="recipe.id" 
+        :recipe="recipe" 
+      />
+    </section>
+
+    <!-- CAS 2 : Si la liste est vide -->
+    <div v-else class="empty-state">
+      <p>Aucune recette disponible pour le moment.</p>
+    </div>
+  </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: sans-serif;
+}
+
+header {
+  margin-bottom: 24px;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: #777;
+  font-size: 1.2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+</style>
