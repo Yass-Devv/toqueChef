@@ -12,26 +12,9 @@ const search = ref('')
   </header>
 
   <main class="content">
-    <!-- Vérification temporaire que la saisie est bien capturée -->
-    <p v-if="search">Recherche : « {{ search }} »</p>
+      <p v-if="search">Recherche : « {{ search }} »</p>
   </main>
+
 </template>
 
-<style scoped>
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 16px;
-}
-
-.header h1 {
-  margin: 0;
-}
-
-.content {
-  padding: 0 16px;
-  text-align: center;
-}
-</style>
+<style scoped></style>
