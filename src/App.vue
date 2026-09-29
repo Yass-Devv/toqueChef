@@ -1,13 +1,31 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import SearchBar from './components/SearchBar.vue'
 import { recipes as allRecipes } from '@/data/recipes'
 import RecipeCard from '@/components/RecipeCard.vue'
 
+// La recherche ne se déclenche qu'à partir de 3 caractères
+const MIN_SEARCH_LENGTH = 3
+
 const search = ref('')
 
-// On stocke les recettes dans une référence réactive
-const recipes = ref(allRecipes)
+// Minuscules + suppression des accents : « Crème » trouve « creme »
+function normalize(text) {
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
+
+const query = computed(() => normalize(search.value.trim()))
+const isSearching = computed(() => query.value.length >= MIN_SEARCH_LENGTH)
+
+// On garde les recettes dont le nom, la description ou un ingrédient contient la recherche
+const recipes = computed(() => {
+  if (!isSearching.value) return allRecipes
+
+  return allRecipes.filter((recipe) =>
+    [recipe.name, recipe.description, ...recipe.ingredients.map((item) => item.ingredient)]
+      .some((text) => normalize(text).includes(query.value))
+  )
+})
 </script>
 
 <template>
@@ -17,7 +35,9 @@ const recipes = ref(allRecipes)
       <SearchBar v-model="search" />
     </header>
 
-    <p v-if="search">Recherche : « {{ search }} »</p>
+    <p v-if="isSearching" class="results-count">
+      {{ recipes.length }} recette{{ recipes.length > 1 ? 's' : '' }} pour « {{ search.trim() }} »
+    </p>
 
     <!-- CAS 1 : Si la liste contient des recettes -->
     <section v-if="recipes.length > 0" class="recipes-grid">
@@ -30,7 +50,8 @@ const recipes = ref(allRecipes)
 
     <!-- CAS 2 : Si la liste est vide -->
     <div v-else class="empty-state">
-      <p>Aucune recette disponible pour le moment.</p>
+      <p v-if="isSearching">Aucune recette ne correspond à « {{ search.trim() }} ».</p>
+      <p v-else>Aucune recette disponible pour le moment.</p>
     </div>
   </main>
 </template>
@@ -45,6 +66,11 @@ const recipes = ref(allRecipes)
 
 header {
   margin-bottom: 24px;
+}
+
+.results-count {
+  margin: 0 0 16px;
+  color: #666;
 }
 
 .recipes-grid {
