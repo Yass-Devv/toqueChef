@@ -1,31 +1,103 @@
+<script setup>
+import { computed, ref } from 'vue'
+import ApplianceFilter from '@/components/ApplianceFilter.vue'
+import RecipeCard from '@/components/RecipeCard.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { recipes as allRecipes } from '@/data/recipes'
+
+// La recherche ne se déclenche qu'à partir de 3 caractères.
+const MIN_SEARCH_LENGTH = 3
+
+const search = ref('')
+const selectedAppliance = ref('')
+
+// Ignore la casse et les accents : « crème » trouve aussi « creme ».
+function normalize(text) {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+const query = computed(() => normalize(search.value.trim()))
+const isSearching = computed(() => query.value.length >= MIN_SEARCH_LENGTH)
+const isFiltering = computed(() => isSearching.value || selectedAppliance.value !== '')
+
+const recipes = computed(() => {
+  return allRecipes.filter((recipe) => {
+    const matchesAppliance =
+      !selectedAppliance.value || recipe.appliance === selectedAppliance.value
+
+    const matchesSearch =
+      !isSearching.value ||
+      [recipe.name, recipe.description, ...recipe.ingredients.map((item) => item.ingredient)]
+        .some((text) => normalize(text).includes(query.value))
+
+    return matchesAppliance && matchesSearch
+  })
+})
+</script>
+
 <template>
-  <main>
-    <!-- Ton filtre -->
-    <ApplianceFilter 
-      :recipes="mockRecipes" 
-      @filter-change="handleFilter" 
-    />
-    
-    <p>Appareil sélectionné : {{ currentFilter || 'Tous' }}</p>
+  <main class="container">
+    <header>
+      <h1>Catalogue de recettes</h1>
+      <SearchBar v-model="search" />
+      <ApplianceFilter
+        :recipes="allRecipes"
+        @filter-change="selectedAppliance = $event"
+      />
+    </header>
+
+    <p v-if="isFiltering" class="results-count">
+      {{ recipes.length }} recette{{ recipes.length > 1 ? 's' : '' }} trouvée{{ recipes.length > 1 ? 's' : '' }}
+    </p>
+
+    <section v-if="recipes.length > 0" class="recipes-grid">
+      <RecipeCard
+        v-for="recipe in recipes"
+        :key="recipe.id"
+        :recipe="recipe"
+      />
+    </section>
+
+    <div v-else class="empty-state">
+      <p v-if="isSearching">Aucune recette ne correspond à « {{ search.trim() }} ».</p>
+      <p v-else>Aucune recette ne correspond à cet appareil.</p>
+    </div>
   </main>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import ApplianceFilter from '@/components/ApplianceFilter.vue';
+<style scoped>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: sans-serif;
+}
 
-const currentFilter = ref('');
+header {
+  margin-bottom: 24px;
+}
 
-// Fausse liste de test pour valider le dédoublonnage
-const mockRecipes = ref([
-  { id: 1, name: 'Salade', appliance: 'Saladier' },
-  { id: 2, name: 'Tarte', appliance: 'Four' },
-  { id: 3, name: 'Gratin', appliance: 'Four' }, // Doublon intentionnel
-  { id: 4, name: 'Smoothie', appliance: 'Blender' }
-]);
+header h1 {
+  margin: 0 0 16px;
+}
 
-const handleFilter = (selected) => {
-  currentFilter.value = selected;
-  console.log('Appareil à filtrer :', selected);
-};
-</script>
+.results-count {
+  margin: 0 0 16px;
+  color: #666;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.empty-state {
+  padding: 48px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  color: #777;
+  font-size: 1.2rem;
+  text-align: center;
+}
+</style>
