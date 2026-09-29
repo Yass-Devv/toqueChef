@@ -3,7 +3,7 @@
     <label for="appliance-select" class="filter-label">Appareil :</label>
     <select 
       id="appliance-select" 
-      v-model="selectedAppliance" 
+      :value="selectedAppliance"
       @change="onApplianceChange"
       class="filter-select"
     >
@@ -20,7 +20,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 // 1. Reçoit soit la liste des recettes, soit directement une liste d'appareils
 const props = defineProps({
@@ -30,11 +31,11 @@ const props = defineProps({
   }
 });
 
-// 2. Déclare l'événement pour transmettre la valeur choisie au parent
-const emit = defineEmits(['filter-change']);
+const route = useRoute();
+const router = useRouter();
 
-// 3. Option par défaut sélectionnée au départ ("Tous les appareils")
-const selectedAppliance = ref('');
+// 2. L'appareil choisi est lu depuis l'URL (?appareil=...), "" = "Tous les appareils"
+const selectedAppliance = computed(() => route.query.appareil || '');
 
 // 4. Génération dynamique sans doublons (Set) et triée par ordre alphabétique
 const applianceList = computed(() => {
@@ -47,9 +48,12 @@ const applianceList = computed(() => {
   return [...new Set(appliances)].sort();
 });
 
-// 5. Envoi de l'événement lors de la sélection
-const onApplianceChange = () => {
-  emit('filter-change', selectedAppliance.value);
+// 5. Mise à jour de l'URL lors de la sélection (replace : pas d'entrée d'historique).
+// "Tous les appareils" donne undefined, ce qui retire la clé de l'URL.
+const onApplianceChange = (e) => {
+  router.replace({
+    query: { ...route.query, appareil: e.target.value || undefined }
+  });
 };
 </script>
 

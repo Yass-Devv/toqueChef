@@ -1,16 +1,31 @@
 <script setup>
-import { ref } from 'vue'
-
-const model = defineModel({ type: String, default: '' })
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 defineProps({
   placeholder: { type: String, default: 'Rechercher une recette…' },
 })
 
+const route = useRoute()
+const router = useRouter()
+
+// La recherche est lue depuis l'URL (?search=...) pour survivre à un rechargement
+const search = computed(() => route.query.search || '')
+
+// replace et non push : pas d'entrée d'historique à chaque lettre.
+// Une valeur undefined retire la clé de l'URL.
+function updateSearch(value) {
+  router.replace({
+    query: { ...route.query, search: value || undefined },
+  })
+}
+
+const onInput = (e) => updateSearch(e.target.value)
+
 const inputRef = ref(null)
 
 function clear() {
-  model.value = ''
+  updateSearch('')
   inputRef.value?.focus()
 }
 </script>
@@ -27,16 +42,17 @@ function clear() {
     <input
       id="recipe-search"
       ref="inputRef"
-      v-model="model"
+      :value="search"
       type="search"
       class="search__input"
       :placeholder="placeholder"
       autocomplete="off"
+      @input="onInput"
       @keydown.esc="clear"
     />
 
     <button
-      v-if="model"
+      v-if="search"
       type="button"
       class="search__clear"
       aria-label="Effacer la recherche"

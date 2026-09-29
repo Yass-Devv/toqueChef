@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import ApplianceFilter from '@/components/ApplianceFilter.vue'
 import RecipeCard from '@/components/RecipeCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
@@ -8,8 +9,11 @@ import { recipes as allRecipes } from '@/data/recipes'
 // La recherche ne se déclenche qu'à partir de 3 caractères.
 const MIN_SEARCH_LENGTH = 3
 
-const search = ref('')
-const selectedAppliance = ref('')
+// La recherche et l'appareil viennent de l'URL (?search=...&appareil=...),
+// mise à jour par SearchBar et ApplianceFilter (US-07).
+const route = useRoute()
+const search = computed(() => route.query.search || '')
+const selectedAppliance = computed(() => route.query.appareil || '')
 
 // Ignore la casse et les accents : « crème » trouve aussi « creme ».
 function normalize(text) {
@@ -39,11 +43,8 @@ const recipes = computed(() => {
   <main class="container">
     <header>
       <h1>Catalogue de recettes</h1>
-      <SearchBar v-model="search" />
-      <ApplianceFilter
-        :recipes="allRecipes"
-        @filter-change="selectedAppliance = $event"
-      />
+      <SearchBar />
+      <ApplianceFilter :recipes="allRecipes" />
     </header>
 
     <p v-if="isFiltering" class="results-count">
