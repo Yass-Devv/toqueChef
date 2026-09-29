@@ -1,11 +1,31 @@
-<script setup></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <main>
+    <!-- Ton filtre -->
+    <ApplianceFilter 
+      :recipes="mockRecipes" 
+      @filter-change="handleFilter" 
+    />
+    
+    <p>Appareil sélectionné : {{ currentFilter || 'Tous' }}</p>
+  </main>
 </template>
 
-<style scoped></style>
+<script setup>
+import { ref } from 'vue';
+import ApplianceFilter from '@/components/ApplianceFilter.vue';
+
+const currentFilter = ref('');
+
+// Fausse liste de test pour valider le dédoublonnage
+const mockRecipes = ref([
+  { id: 1, name: 'Salade', appliance: 'Saladier' },
+  { id: 2, name: 'Tarte', appliance: 'Four' },
+  { id: 3, name: 'Gratin', appliance: 'Four' }, // Doublon intentionnel
+  { id: 4, name: 'Smoothie', appliance: 'Blender' }
+]);
+
+const handleFilter = (selected) => {
+  currentFilter.value = selected;
+  console.log('Appareil à filtrer :', selected);
+};
+</script>
