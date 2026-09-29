@@ -1,6 +1,6 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import ApplianceFilter from '@/components/ApplianceFilter.vue'
 import RecipeCard from '@/components/RecipeCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
@@ -10,28 +10,17 @@ import { recipes as allRecipes } from '@/data/recipes'
 const MIN_SEARCH_LENGTH = 3
 
 const route = useRoute()
-const router = useRouter()
 
 // Ignore la casse et les accents : « crème » trouve aussi « creme ».
 function normalize(text) {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }
 
-// État local des champs, initialisé depuis l'URL pour survivre à un rechargement.
-const search = ref(route.query.search ? String(route.query.search) : '')
-const selectedAppliance = ref(route.query.appareil ? String(route.query.appareil) : '')
+// La recherche et l'appareil viennent de l'URL (?search=...&appareil=...),
+// mise à jour par SearchBar et ApplianceFilter (US-07) : on les retrouve après un rechargement.
+const search = computed(() => String(route.query.search || ''))
 
-// Les champs pilotent l'URL, qui reste la source de vérité pour le filtrage
-// (la synchronisation fine clavier/historique est affinée en US-07).
-watch(search, (value) => {
-  router.replace({ query: { ...route.query, search: value || undefined } })
-})
-
-watch(selectedAppliance, (value) => {
-  router.replace({ query: { ...route.query, appareil: value || undefined } })
-})
-
-const query = computed(() => normalize(String(route.query.search || '').trim()))
+const query = computed(() => normalize(search.value.trim()))
 const isSearching = computed(() => query.value.length >= MIN_SEARCH_LENGTH)
 const appareil = computed(() => route.query.appareil || '')
 const isFiltering = computed(() => isSearching.value || appareil.value !== '')
@@ -54,11 +43,8 @@ const filteredRecipes = computed(() => {
   <div>
     <header>
       <h1>Catalogue de recettes</h1>
-      <SearchBar v-model="search" />
-      <ApplianceFilter
-        :recipes="allRecipes"
-        @filter-change="selectedAppliance = $event"
-      />
+      <SearchBar />
+      <ApplianceFilter :recipes="allRecipes" />
     </header>
 
     <p v-if="isFiltering" class="results-count">
