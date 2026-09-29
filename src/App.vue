@@ -1,30 +1,37 @@
 <script setup>
-import { ref, computed } from 'vue'
-import SearchBar from './components/SearchBar.vue'
-import { recipes as allRecipes } from '@/data/recipes'
+import { computed, ref } from 'vue'
+import ApplianceFilter from '@/components/ApplianceFilter.vue'
 import RecipeCard from '@/components/RecipeCard.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { recipes as allRecipes } from '@/data/recipes'
 
-// La recherche ne se déclenche qu'à partir de 3 caractères
+// La recherche ne se déclenche qu'à partir de 3 caractères.
 const MIN_SEARCH_LENGTH = 3
 
 const search = ref('')
+const selectedAppliance = ref('')
 
-// Minuscules + suppression des accents : « Crème » trouve « creme »
+// Ignore la casse et les accents : « crème » trouve aussi « creme ».
 function normalize(text) {
-  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 }
 
 const query = computed(() => normalize(search.value.trim()))
 const isSearching = computed(() => query.value.length >= MIN_SEARCH_LENGTH)
+const isFiltering = computed(() => isSearching.value || selectedAppliance.value !== '')
 
-// On garde les recettes dont le nom, la description ou un ingrédient contient la recherche
 const recipes = computed(() => {
-  if (!isSearching.value) return allRecipes
+  return allRecipes.filter((recipe) => {
+    const matchesAppliance =
+      !selectedAppliance.value || recipe.appliance === selectedAppliance.value
 
-  return allRecipes.filter((recipe) =>
-    [recipe.name, recipe.description, ...recipe.ingredients.map((item) => item.ingredient)]
-      .some((text) => normalize(text).includes(query.value))
-  )
+    const matchesSearch =
+      !isSearching.value ||
+      [recipe.name, recipe.description, ...recipe.ingredients.map((item) => item.ingredient)]
+        .some((text) => normalize(text).includes(query.value))
+
+    return matchesAppliance && matchesSearch
+  })
 })
 </script>
 
@@ -33,13 +40,16 @@ const recipes = computed(() => {
     <header>
       <h1>Catalogue de recettes</h1>
       <SearchBar v-model="search" />
+      <ApplianceFilter
+        :recipes="allRecipes"
+        @filter-change="selectedAppliance = $event"
+      />
     </header>
 
-    <p v-if="isSearching" class="results-count">
-      {{ recipes.length }} recette{{ recipes.length > 1 ? 's' : '' }} pour « {{ search.trim() }} »
+    <p v-if="isFiltering" class="results-count">
+      {{ recipes.length }} recette{{ recipes.length > 1 ? 's' : '' }} trouvée{{ recipes.length > 1 ? 's' : '' }}
     </p>
 
-    <!-- CAS 1 : Si la liste contient des recettes -->
     <section v-if="recipes.length > 0" class="recipes-grid">
       <RecipeCard
         v-for="recipe in recipes"
@@ -48,10 +58,9 @@ const recipes = computed(() => {
       />
     </section>
 
-    <!-- CAS 2 : Si la liste est vide -->
     <div v-else class="empty-state">
       <p v-if="isSearching">Aucune recette ne correspond à « {{ search.trim() }} ».</p>
-      <p v-else>Aucune recette disponible pour le moment.</p>
+      <p v-else>Aucune recette ne correspond à cet appareil.</p>
     </div>
   </main>
 </template>
@@ -68,6 +77,10 @@ header {
   margin-bottom: 24px;
 }
 
+header h1 {
+  margin: 0 0 16px;
+}
+
 .results-count {
   margin: 0 0 16px;
   color: #666;
@@ -80,11 +93,11 @@ header {
 }
 
 .empty-state {
-  text-align: center;
   padding: 48px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
   color: #777;
   font-size: 1.2rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
+  text-align: center;
 }
 </style>
