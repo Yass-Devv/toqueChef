@@ -9,7 +9,7 @@ defineProps({
 
 <template>
     <RouterLink :to="{ name: 'recipe-detail', params: { id: recipe.id } }" class="recipe-card">
-        <img :src="`/images/${recipe.image}`" :alt="recipe.name" class="recipe-image" />
+        <img :src="`/images/${recipe.image || 'default.svg'}`" :alt="recipe.name" class="recipe-image" />
         <div class="recipe-content">
             <h2 class="recipe-title">{{ recipe.name }}</h2>
             <p class="recipe-time">⏱ {{ recipe.time }} min</p>
