@@ -1,40 +1,24 @@
 <script setup>
 import { computed } from 'vue'
-<<<<<<< HEAD
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useMenuStore } from '@/stores/menuStore'
-=======
-import { useRoute, useRouter } from 'vue-router'
-import { recipes } from '@/data/recipes'
-import { useMenuStore } from '@/stores/menu'
->>>>>>> origin/main
 
 const route = useRoute()
-<<<<<<< HEAD
+const router = useRouter()
 const recipeStore = useRecipeStore()
 const menuStore = useMenuStore()
 
+// getById convertit l'id de l'URL (une chaîne) en nombre.
 const recipe = computed(() => recipeStore.getById(route.params.id))
-const inMenu = computed(() => menuStore.isInMenu(route.params.id))
 
-const toggleMenu = () => {
-  if (inMenu.value) menuStore.removeRecipe(recipe.value.id)
-  else menuStore.addRecipe(recipe.value.id)
-=======
-const router = useRouter()
-const menu = useMenuStore()
-
-// route.params.id est une chaîne ("3") : on la convertit pour comparer avec l'id numérique.
-const recipe = computed(() => recipes.find((r) => r.id === Number(route.params.id)))
-
-const inMenu = computed(() => menu.isInMenu(recipe.value.id))
+const inMenu = computed(() => menuStore.isInMenu(recipe.value.id))
 
 function toggleMenu() {
   if (inMenu.value) {
-    menu.remove(recipe.value.id)
+    menuStore.removeRecipe(recipe.value.id)
   } else {
-    menu.add(recipe.value)
+    menuStore.addRecipe(recipe.value.id)
   }
 }
 
@@ -48,7 +32,6 @@ function goBack() {
   } else {
     router.push({ name: 'home' })
   }
->>>>>>> origin/main
 }
 </script>
 
@@ -62,13 +45,6 @@ function goBack() {
       <RouterLink :to="{ name: 'home' }">Revenir à l'accueil</RouterLink>
     </div>
 
-<<<<<<< HEAD
-    <button v-if="recipe" type="button" class="menu-button" @click="toggleMenu">
-      {{ inMenu ? 'Retirer du menu' : 'Ajouter au menu' }}
-    </button>
-
-    <p class="note">Page de détail complète à venir (US-06).</p>
-=======
     <article v-else>
       <img :src="`/images/${recipe.image}`" :alt="recipe.name" class="recipe-image" />
 
@@ -114,7 +90,6 @@ function goBack() {
         <p class="recipe-description">{{ recipe.description }}</p>
       </section>
     </article>
->>>>>>> origin/main
   </div>
 </template>
 
@@ -124,21 +99,6 @@ function goBack() {
   margin: 0 auto;
 }
 
-<<<<<<< HEAD
-.menu-button {
-  padding: 10px 20px;
-  font: inherit;
-  color: #fff;
-  background: #e85d2a;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.note {
-  color: #999;
-  font-style: italic;
-=======
 .back-button {
   margin-bottom: 24px;
   padding: 8px 16px;
@@ -206,6 +166,5 @@ function goBack() {
 .not-found a {
   color: #e85d2a;
   font-weight: 600;
->>>>>>> origin/main
 }
 </style>
