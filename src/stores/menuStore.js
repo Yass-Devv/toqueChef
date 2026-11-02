@@ -7,6 +7,8 @@ export const useMenuStore = defineStore('menu', {
   }),
 
   getters: {
+    count: (state) => state.recipeIds.length,
+
     isInMenu: (state) => (id) => state.recipeIds.includes(Number(id)),
   },
 

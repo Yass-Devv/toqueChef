@@ -1,4 +1,7 @@
 <script setup>
+import { useMenuStore } from '@/stores/menuStore'
+
+const menuStore = useMenuStore()
 </script>
 
 <template>
@@ -6,6 +9,7 @@
     <nav class="main-nav">
       <RouterLink to="/" class="main-nav__link">Recettes</RouterLink>
       <RouterLink to="/ajouter" class="main-nav__link">Ajouter une recette</RouterLink>
+      <RouterLink to="/menu" class="main-nav__link">Mon menu ({{ menuStore.count }})</RouterLink>
     </nav>
 
     <main class="container">
