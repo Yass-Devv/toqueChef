@@ -10,7 +10,6 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      // Contenu complet réalisé par l'US-06 (Étudiant B).
       path: '/recipe/:id',
       name: 'recipe-detail',
       component: () => import('@/views/RecipeDetailView.vue'),
@@ -20,6 +19,12 @@ const router = createRouter({
       path: '/ajouter',
       name: 'recipe-new',
       component: () => import('@/views/RecipeFormView.vue'),
+    },
+    {
+      // Toute URL inconnue : doit rester la dernière route.
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
     },
   ],
 })
