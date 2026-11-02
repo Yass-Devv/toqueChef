@@ -4,12 +4,13 @@ import { useRoute } from 'vue-router'
 import ApplianceFilter from '@/components/ApplianceFilter.vue'
 import RecipeCard from '@/components/RecipeCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import { recipes as allRecipes } from '@/data/recipes'
+import { useRecipeStore } from '@/stores/recipeStore'
 
 // La recherche ne se déclenche qu'à partir de 3 caractères.
 const MIN_SEARCH_LENGTH = 3
 
 const route = useRoute()
+const recipeStore = useRecipeStore()
 
 // Ignore la casse et les accents : « crème » trouve aussi « creme ».
 function normalize(text) {
@@ -26,7 +27,7 @@ const appareil = computed(() => route.query.appareil || '')
 const isFiltering = computed(() => isSearching.value || appareil.value !== '')
 
 const filteredRecipes = computed(() => {
-  return allRecipes.filter((recipe) => {
+  return recipeStore.recipes.filter((recipe) => {
     const matchesAppliance = !appareil.value || recipe.appliance === appareil.value
 
     const matchesSearch =
@@ -44,7 +45,7 @@ const filteredRecipes = computed(() => {
     <header>
       <h1>Catalogue de recettes</h1>
       <SearchBar />
-      <ApplianceFilter :recipes="allRecipes" />
+      <ApplianceFilter />
     </header>
 
     <p v-if="isFiltering" class="results-count">

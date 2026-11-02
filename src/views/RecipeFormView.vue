@@ -1,9 +1,10 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { recipes } from '@/data/recipes'
+import { useRecipeStore } from '@/stores/recipeStore'
 
 const router = useRouter()
+const recipeStore = useRecipeStore()
 
 const form = ref({
   name: '',
@@ -14,9 +15,6 @@ const form = ref({
   description: '',
 })
 
-// Appareils existants, sans doublons
-const appliances = computed(() => [...new Set(recipes.map((r) => r.appliance))].sort())
-
 // Aucune validation pour l'instant (US ultérieure)
 const submit = () => {
   const newRecipe = {
@@ -25,7 +23,7 @@ const submit = () => {
     ingredients: [],
     ustensils: [],
   }
-  recipes.push(newRecipe)
+  recipeStore.addRecipe(newRecipe)
   router.push({ name: 'recipe-detail', params: { id: newRecipe.id } })
 }
 </script>
@@ -56,7 +54,7 @@ const submit = () => {
         Appareil
         <select v-model="form.appliance">
           <option value="">-- Choisir --</option>
-          <option v-for="a in appliances" :key="a" :value="a">{{ a }}</option>
+          <option v-for="a in recipeStore.appliances" :key="a" :value="a">{{ a }}</option>
         </select>
       </label>
 

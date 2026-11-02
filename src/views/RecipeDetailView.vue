@@ -1,12 +1,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { recipes } from '@/data/recipes'
+import { useRecipeStore } from '@/stores/recipeStore'
 
 // Placeholder en attendant l'implémentation complète de l'US-06 (Étudiant B).
 const route = useRoute()
+const recipeStore = useRecipeStore()
 
-const recipe = computed(() => recipes.find((r) => r.id === Number(route.params.id)))
+const recipe = computed(() => recipeStore.getById(route.params.id))
 </script>
 
 <template>

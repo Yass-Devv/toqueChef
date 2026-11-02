@@ -22,14 +22,9 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useRecipeStore } from '@/stores/recipeStore';
 
-// 1. Reçoit soit la liste des recettes, soit directement une liste d'appareils
-const props = defineProps({
-  recipes: {
-    type: Array,
-    default: () => []
-  }
-});
+const recipeStore = useRecipeStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -37,16 +32,8 @@ const router = useRouter();
 // 2. L'appareil choisi est lu depuis l'URL (?appareil=...), "" = "Tous les appareils"
 const selectedAppliance = computed(() => route.query.appareil || '');
 
-// 4. Génération dynamique sans doublons (Set) et triée par ordre alphabétique
-const applianceList = computed(() => {
-  if (!props.recipes || props.recipes.length === 0) return [];
-  
-  const appliances = props.recipes
-    .map(recipe => recipe.appliance) // adapte la clé si elle s'appelle différemment (ex: appareil)
-    .filter(Boolean); // retire les valeurs nulles ou indéfinies
-
-  return [...new Set(appliances)].sort();
-});
+// 3. Appareils sans doublon, fournis par le store
+const applianceList = computed(() => recipeStore.appliances);
 
 // 5. Mise à jour de l'URL lors de la sélection (replace : pas d'entrée d'historique).
 // "Tous les appareils" donne undefined, ce qui retire la clé de l'URL.
