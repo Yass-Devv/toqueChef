@@ -2,12 +2,24 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { recipes } from '@/data/recipes'
+import { useMenuStore } from '@/stores/menu'
 
 const route = useRoute()
 const router = useRouter()
+const menu = useMenuStore()
 
 // route.params.id est une chaîne ("3") : on la convertit pour comparer avec l'id numérique.
 const recipe = computed(() => recipes.find((r) => r.id === Number(route.params.id)))
+
+const inMenu = computed(() => menu.isInMenu(recipe.value.id))
+
+function toggleMenu() {
+  if (inMenu.value) {
+    menu.remove(recipe.value.id)
+  } else {
+    menu.add(recipe.value)
+  }
+}
 
 // Une recette des données utilise la clé "unite" au lieu de "unit".
 const unitOf = (item) => item.unit || item.unite
@@ -42,6 +54,15 @@ function goBack() {
         <li>🍽 {{ recipe.servings }} portion{{ recipe.servings > 1 ? 's' : '' }}</li>
         <li>🔌 {{ recipe.appliance }}</li>
       </ul>
+
+      <button
+        type="button"
+        class="menu-button"
+        :class="{ 'menu-button--active': inMenu }"
+        @click="toggleMenu"
+      >
+        {{ inMenu ? 'Retirer du menu' : 'Ajouter au menu' }}
+      </button>
 
       <div class="recipe-columns">
         <section>
@@ -106,6 +127,22 @@ function goBack() {
   padding: 0;
   list-style: none;
   color: #666;
+}
+
+.menu-button {
+  padding: 10px 20px;
+  border: 1px solid #e85d2a;
+  border-radius: 999px;
+  background-color: #e85d2a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.menu-button--active {
+  background-color: #fff;
+  color: #e85d2a;
 }
 
 .recipe-columns {
