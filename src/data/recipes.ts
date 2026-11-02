@@ -1,6 +1,8 @@
+import { reactive } from 'vue'
 import type { Recipe } from '@/types/recipe'
 
-export const recipes: Recipe[] = [
+// reactive : les recettes ajoutées via le formulaire (US-08) apparaissent dans l'accueil.
+export const recipes: Recipe[] = reactive<Recipe[]>([
     {
         "id": 1,
         "image": "Recette01.jpg",
@@ -1775,4 +1777,4 @@ export const recipes: Recipe[] = [
         "appliance": "Four",
         "ustensils":["rouleau à patisserie","fouet"]
     }
-]
+])
