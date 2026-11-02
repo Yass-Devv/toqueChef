@@ -10,7 +10,6 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      // Contenu complet réalisé par l'US-06 (Étudiant B).
       path: '/recipe/:id',
       name: 'recipe-detail',
       component: () => import('@/views/RecipeDetailView.vue'),
@@ -22,6 +21,7 @@ const router = createRouter({
       component: () => import('@/views/RecipeFormView.vue'),
     },
     {
+<<<<<<< HEAD
       path: '/menu',
       name: 'menu',
       component: () => import('@/views/MenuView.vue'),
@@ -30,6 +30,12 @@ const router = createRouter({
       path: '/courses',
       name: 'shopping-list',
       component: () => import('@/views/ShoppingListView.vue'),
+=======
+      // Toute URL inconnue : doit rester la dernière route.
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
+>>>>>>> origin/main
     },
   ],
 })
